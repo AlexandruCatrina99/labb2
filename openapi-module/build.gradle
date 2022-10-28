@@ -1,0 +1,75 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+plugins {
+    id "java-library"
+    id "maven-publish"
+    id "org.openapi.generator" version "6.0.1"
+}
+
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation "org.springdoc:springdoc-openapi-webmvc-core:${springDocVersion}"
+    implementation "io.swagger:swagger-annotations:1.6.6"
+    implementation "javax.annotation:javax.annotation-api"
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    implementation "org.openapitools:jackson-databind-nullable:0.2.3"
+}
+
+
+sourceSets.main.java.srcDir "${buildDir}/generated/src/main/java"
+
+def openApiSpec = "$projectDir/src/main/resources/openapi.yaml".toString()
+
+task openApiGenerateInterface(type: GenerateTask) {
+    generatorName = "spring"
+    inputSpec = openApiSpec
+    outputDir = "$buildDir/generated".toString()
+    apiPackage = "ax.ha.lab2.interfaces"
+    modelPackage = "ax.ha.lab2.entiry"
+    generateApiDocumentation = false
+    skipValidateSpec = false
+    configOptions = [
+            dateLibrary         : "java8",
+            interfaceOnly       : "true",
+            library             : "spring-boot",
+            serializationLibrary: "jackson",
+            skipDefaultInterface: "true",
+            useBeanValidation   : "true",
+            useTags             : "true",
+    ]
+    typeMappings = ["string+date-time": "Instant"]
+    importMappings = ["Instant": "java.time.Instant"]
+
+}
+
+task openApiGenerateTestClient(type: GenerateTask) {
+    generatorName = "java"
+    inputSpec = openApiSpec
+    outputDir = "$buildDir/generated".toString()
+    apiPackage = "testclient.api"
+    modelPackage = "testclient.model"
+    generateApiDocumentation = false
+    skipValidateSpec = true
+    configOptions = [
+            dateLibrary         : "java8",
+            library             : "resttemplate",
+            serializationLibrary: "jackson",
+    ]
+    typeMappings = ["string+date-time": "Instant"]
+    importMappings = ["Instant": "java.time.Instant"]
+
+}
+
+task openApiJar(type:Jar){
+    from sourceSets.main.resources
+    include 'openapi.yaml'
+}
+
+compileJava{
+    dependsOn openApiGenerateInterface, openApiGenerateTestClient
+}
+
+task prepareKotlinBuildScriptModel {
+
+}

@@ -1,0 +1,51 @@
+plugins {
+    id 'org.springframework.boot' version '2.7.3'
+    id 'io.spring.dependency-management' version '1.0.13.RELEASE'
+    id 'java'
+}
+
+allprojects {
+    version = findProperty("projectVersion") ?: "1.0-SNAPSHOT"
+    group = rootProject.name
+
+    tasks.withType(Copy).all {
+        duplicatesStrategy 'warn'
+    }
+}
+repositories {
+    mavenCentral()
+}
+subprojects {
+    apply plugin: "io.spring.dependency-management"
+    apply plugin: "idea"
+
+    ext {
+        springDocVersion = "1.6.9"
+        groovyVersion = "3.0.11"
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:2.6.2"
+//            mavenBom "org.springframework.cloud:spring-cloud-dependencies:2021.0.4"
+            mavenBom "org.spockframework:spock-bom:2.0-groovy-${(groovyVersion =~ /^(\d+.\d+)/)[0][1]}"
+        }
+
+
+        repositories {
+            mavenCentral()
+            maven {
+                url "https://plugins.gradle.org/m2/"
+            }
+        }
+    }
+}
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+

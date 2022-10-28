@@ -1,0 +1,80 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'org.springframework.boot' version '2.7.3'
+    id "com.palantir.docker" version  "0.30.0"
+}
+
+group = 'ax.ha'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+ext {
+    mapstructVersion = "1.4.2.Final"
+}
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(":openapi-module")
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+    implementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+//    implementation 'org.springframework.cloud:spring-cloud-starter-sleuth'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    implementation "org.springdoc:springdoc-openapi-ui:${springDocVersion}"
+    implementation 'org.projectlombok:lombok:1.18.22'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'com.h2database:h2'
+    implementation "org.flywaydb:flyway-core"
+    implementation "org.apache.commons:commons-lang3"
+    implementation "com.oracle.database.jdbc:ojdbc11"
+    implementation "net.logstash.logback:logstash-logback-encoder:7.0.1"
+
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    implementation "com.querydsl:querydsl-jpa"
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties["querydsl.version"]}:jpa"
+    annotationProcessor "org.springframework.boot:spring-boot-starter-data-jpa"
+    testImplementation "org.codehaus.groovy:groovy:${groovyVersion}"
+    testImplementation "org.spockframework:spock-spring"
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            it.additional.buildNumber = System.getenv("BUILD_NUMBER") ?: ""
+            it.additional.commitId = System.getenv("GIT_COMMIT") ?: ""
+            it.version =findProperty("actualProjectVersion") ?: project.version
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootJar {
+    archiveFileName = "${rootProject.name}-${project.version}.jar"
+}
+task prepareKotlinBuildScriptModel {
+
+}
+
+docker {
+    dependsOn bootJar
+    name "alexandrucatrina/${rootProject.name}:${project.version}"
+    dockerfile file("docker/Dockerfile")
+    files "$buildDir/libs/"
+    buildArgs([PROJECT_VERSION: "${project.version}", PROJECT_NAME: "${rootProject.name}"])
+    noCache true
+}

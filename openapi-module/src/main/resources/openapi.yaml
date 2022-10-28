@@ -1,0 +1,153 @@
+openapi: 3.0.1
+info:
+  title: Swagger Store
+  description: 'Lab2 Project'
+  contact:
+    email: alexandru.catrina@ha,ax
+  version: 1.0.0
+tags:
+  - name: item
+    description: Everything about our items
+paths:
+  /item/add:
+    post:
+      tags:
+        - item
+      summary: Add an item
+      operationId: addItem
+      requestBody:
+        description: Item object that needs to be added to the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+        required: true
+      responses:
+        200:
+          description: "Item added successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Item not found
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+
+
+
+  /item/update:
+    post:
+      tags:
+        - item
+      summary: "Update an item"
+      operationId: updateItem
+      requestBody:
+        description: Item object that needs to be added to the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+        required: true
+      responses:
+        200:
+          description: "Item updated successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Item not found
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+
+
+  /item/get{id}:
+    get:
+      tags:
+        - item
+      summary: "Get an item"
+      operationId: getItem
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: "Item's id"
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Item not found
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+
+  /item/get/all:
+    get:
+      tags:
+        - item
+      summary: "Get item list"
+      operationId: getAll
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemList'
+        400:
+          description: Invalid ID supplied
+          content: { }
+        404:
+          description: Item not found
+          content: { }
+        405:
+          description: Validation exception
+          content: { }
+
+
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price:
+          type: integer
+        category:
+          type: string
+    ItemList:
+      type: object
+      properties:
+        items:
+          type: array
+          minItems: 0
+          items:
+            $ref: "#/components/schemas/Item"
+
+
